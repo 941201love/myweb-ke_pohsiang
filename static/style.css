@@ -100,7 +100,7 @@ nav a:hover {
     position: static;
     transform: none; 
     color: #FFE5D9;
-    font-size: 1.5rem;
+    font-size: 1.1rem;
     font-weight: bold;
     white-space: nowrap; /* 避免文字換行 */
 }
@@ -206,8 +206,8 @@ nav a:hover {
     transition: 0.3s;
 }
 
-/* 當螢幕寬度大於 1300px (電腦滿屏狀態) */
-@media (min-width: 1300px) {
+/* 當螢幕寬度大於 754px (電腦滿屏狀態) */
+@media (min-width: 754px) {
     /* 1. 隱藏漢堡按鈕 */
     .menu-icon {
         display: none !important;
