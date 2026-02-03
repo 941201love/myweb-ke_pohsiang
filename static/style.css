@@ -7,72 +7,10 @@ body {
     line-height: 1.6;
     margin: 0;
     padding: 0;
+    overflow-x: hidden; /* 防止手機版左右晃動 */
 }
 
-/* --- 1. 漢堡按鈕圖示 --- */
-.menu-icon {
-    width: 30px;
-    height: 22px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    cursor: pointer;
-    z-index: 3000;           /* 永遠在最上 */
-}
-/* 畫按鈕 */
-.menu-icon span {
-    height: 3px;
-    width: 100%;
-    background-color: #FFE5D9;
-    border-radius: 2px;
-}
-
-/* --- 2. 導覽列選單 --- */
-nav {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 250px;
-    height: 100%;
-    overflow-y: auto;
-    background-color: #D8E2DC;
-    padding-top: 80px;
-    transform: translateX(-100%);   /* 藏起來 */
-    transition: transform 0.3s ease;
-    z-index: 2000;
-    box-shadow: 2px 0 10px rgba(0,0,0,0.3);
-}
-
-nav.active {
-    transform: translateX(0);       /* 滑出來 */
-}
-
-/* --- 3. 選單內的連結 --- */
-nav a {
-    color: #333333 !important; 
-    font-family: 'Chiron GoRound TC', sans-serif;
-    text-decoration: none;
-    display: block;      
-    padding: 15px 30px;  
-    transition: 0.3s;
-    font-weight: bold;
-}
-
-nav a:hover {
-    background-color: #CAD2C5;
-    color: #BD6B73 !important;
-}
-
-/* --- 4. 叉叉按鈕 --- */
-.close-btn {
-    position: absolute;
-    top: 15px;
-    right: 20px;
-    font-size: 30px;
-    cursor: pointer;
-}
-
-/* --- 頂部固定條樣式 --- */
+/* --- 1. 導覽列與按鈕 --- */
 .top-navbar {
     width: 100%;
     height: 60px;
@@ -91,179 +29,135 @@ nav a:hover {
     margin: 0 auto;
     padding: 0 20px;
     display: flex;
-    justify-content: space-between; /* 關鍵：加上這行，才會把按鈕推向左，名字推向右 */
+    justify-content: space-between;
     align-items: center;
 }
 
-.nav-logo {
-    /* 使用 absolute 置中，這樣不會擠到按鈕 */
-    position: static;
-    transform: none; 
-    color: #FFE5D9;
-    font-size: 1.5rem;
-    font-weight: bold;
-    white-space: nowrap; /* 避免文字換行 */
+.menu-icon {
+    width: 30px;
+    height: 22px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    cursor: pointer;
+    z-index: 3000;
 }
 
-/* --- Home Banner (純圖片版) --- */
+.menu-icon span {
+    height: 3px;
+    width: 100%;
+    background-color: #FFE5D9;
+    border-radius: 2px;
+}
+
+.nav-logo {
+    color: #FFE5D9;
+    font-size: 1.2rem; /* 手機版小一點 */
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+/* --- 2. 側邊選單 (修復底部問題) --- */
+nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 250px;
+    height: 100%; /* 使用 100% 避開 vh Bug */
+    overflow-y: auto;
+    background-color: #D8E2DC;
+    padding-top: 80px;
+    padding-bottom: 50px; /* 底部留白 */
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    z-index: 2000;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.3);
+}
+
+nav.active { transform: translateX(0); }
+
+nav a {
+    color: #333333 !important; 
+    text-decoration: none;
+    display: block;      
+    padding: 15px 30px;  
+    font-weight: bold;
+}
+
+/* --- 3. 內容佈局 (核心修正) --- */
 .hero-banner {
     width: 100%;
-    height: 250px; /* 你可以自己調整高度，比如 500px 會更大張 */
-    /* 修正：拿掉 linear-gradient 的黑影，直接顯示圖片 */
+    height: 200px; /* 手機版矮一點 */
     background-image: url('/static/photos/banner.jpg'); 
-    
-    background-size: cover;     /* 讓圖片鋪滿不留白 */
-    background-position: 90% 35% ; /* 讓圖片中心對準中間 */
-    display: block;             /* 因為裡面沒東西了，改回 block 即可 */
+    background-size: cover;
+    background-position: center;
+    margin-top: 60px; /* 避開固定導覽列 */
 }
 
-.content {
-    padding: 40px 20px;
-    text-align: center;
-}
-
-/* --- 原有的設定保持不變，新增以下響應式邏輯 --- */
-
-/* 預設狀態：隱藏電腦版連結 */
-.nav-links-desktop {
-    display: none;
-}
-
-/* --- 首頁內容佈局 --- */
 .main-container {
     max-width: 1200px;
-    margin: 40px auto;
-    padding: 0 20px;
+    margin: 20px auto;
+    padding: 0 15px;
     display: flex;
-    flex-direction: column; /* 預設手機版：上下堆疊 */
+    flex-direction: column; /* 預設上下堆疊 */
     gap: 20px;
 }
 
-/* 左側/上方卡片 (紅色區塊) */
-.profile-card {
+.profile-card, .detail-content {
     background: white;
-    padding: 30px;
+    padding: 20px;
     border-radius: 12px;
     box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    text-align: center;
 }
 
 .profile-img img {
-    width: 150px;
-    height: 150px;
+    width: 120px; /* 手機版頭像縮小 */
+    height: 120px;
     border-radius: 50%;
     object-fit: cover;
-    border: 4px solid #f0f0f0;
-    margin-bottom: 15px;
 }
 
-.info-list {
-    list-style: none;
-    padding: 0;
-    text-align: left;
-    margin-top: 20px;
-}
-
-.info-list li {
-    padding: 8px 0;
-    border-bottom: 1px solid #eee;
-    font-size: 0.9rem;
-}
-
-/* 右側/下方內容 (綠色區塊) */
-.detail-content {
-    background: white;
-    padding: 30px;
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-}
-
-.detail-content h2 {
-    color: #333;
-    margin-bottom: 15px;
-    font-size: 1.4rem;
-    border-left: 5px solid #B23A48;
-    padding-left: 12px;
-}
-
-.detail-content h2 span {
-    color: #B23A48;
-    font-size: 0.9rem;
-    margin-left: 8px;
-}
-
-/* 生活照片網格 */
+/* 照片網格適應 */
 .photo-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    grid-template-columns: 1fr; /* 手機版一欄 */
     gap: 15px;
-    margin-top: 20px;
 }
 
-.photo-item img {
-    width: 100%;
-    border-radius: 8px;
-    transition: 0.3s;
-}
-
-/* 當螢幕寬度大於 768px (電腦滿屏狀態) */
-@media (min-width: 1300px) {
-    /* 1. 隱藏漢堡按鈕 */
-    .menu-icon {
-        display: none !important;
-    }
-
-    /* 2. 顯示電腦版連結 */
+/* --- 4. 電腦版調整 (螢幕大於 800px 啟動) --- */
+@media (min-width: 800px) {
+    .menu-icon { display: none; } /* 隱藏漢堡 */
+    
     .nav-links-desktop {
         display: flex;
-        gap: 25px; /* 連結之間的距離 */
+        gap: 20px;
     }
-
     .nav-links-desktop a {
         color: white;
         text-decoration: none;
         font-weight: bold;
-        font-size: 1rem;
-        transition: 0.3s;
     }
 
-    .nav-links-desktop a:hover {
-        color: #B23A48;
-    }
-
-    /* 3. 調整排列：名字在左，連結在右 */
-    .nav-container {
-        justify-content: space-between; /* 推到兩端 */
-    }
-
-    /* 滿屏時名字不一定要絕對置中，取消 absolute 讓它排在左邊 */
-    .nav-logo {
-        position: static;
-        transform: none;
-    }
-
-    /* 確保側邊選單在電腦版就算被開啟也會被強制關閉 */
-    nav.active {
-        left: -250px;
-    }
-
-    .hero-banner {
-        height: 350px;           /* 大螢幕時稍微增加顯示高度 */
-        background-position: 90% 40%; /* 針對大螢幕微調垂直位置 */
-    }
+    .hero-banner { height: 350px; }
 
     .main-container {
-        flex-direction: row; /* 電腦版：改為左右並排 */
+        flex-direction: row; /* 左右並排 */
         align-items: flex-start;
+        margin-top: 40px;
     }
 
     .profile-card {
-        width: 320px; /* 固定左側寬度 */
+        width: 300px;
         flex-shrink: 0;
+        position: sticky; /* 捲動時卡片固定在左邊 */
+        top: 80px;
     }
 
-    .detail-content {
-        flex: 1; /* 右側自動填滿剩餘空間 */
+    .detail-content { flex: 1; }
+
+    .photo-grid {
+        grid-template-columns: repeat(3, 1fr); /* 電腦版三欄 */
     }
+    
+    .nav-logo { font-size: 1.5rem; }
 }
-
