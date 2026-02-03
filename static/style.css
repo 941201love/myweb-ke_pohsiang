@@ -206,7 +206,7 @@ nav a:hover {
 }
 
 /* 當螢幕寬度大於 768px (電腦滿屏狀態) */
-@media (min-width: 768px) {
+@media (min-width: 1300px) {
     /* 1. 隱藏漢堡按鈕 */
     .menu-icon {
         display: none !important;
