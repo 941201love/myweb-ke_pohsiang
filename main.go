@@ -36,6 +36,12 @@ func awards(w http.ResponseWriter, r *http.Request) {
 /* ----------------------------------------------------------- */
 
 func main() {
+
+	// 當 Google 來找這個檔案時，直接把檔案內容讀給它看
+	http.HandleFunc("/google2d7020435e6908ed.html", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "google2d7020435e6908ed.html")
+	})
+
 	// 1. 靜態檔案設定
 	fs := http.FileServer(http.Dir("static"))
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
