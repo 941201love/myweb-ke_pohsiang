@@ -4,9 +4,8 @@ import (
 	"fmt" // 新增：印出更詳細的啟動訊息
 	"html/template"
 	"net/http"
-	"os"      // 新增：引入處理環境變數的工具
-	"strconv" // 新增：用來把文字轉成數字
-	"sync"    // 新增：防止多個人同時造訪造成計算錯誤
+	"os"   // 新增：引入處理環境變數的工具
+	"sync" // 新增：防止多個人同時造訪造成計算錯誤
 )
 
 /* ----------------------------------------------------------- */
@@ -15,35 +14,11 @@ import (
 var visitorCount int
 var mu sync.Mutex // 這是「互斥鎖」，確保加法時不會出錯
 
-// --- 新增：讀取檔案的函式 ---
-func loadCount() int {
-	data, err := os.ReadFile("counter.txt")
-	if err != nil {
-		fmt.Println("⚠️ 找不到 counter.txt，將從 0 開始")
-		return 0
-	}
-	count, err := strconv.Atoi(string(data))
-	if err != nil {
-		fmt.Println("⚠️ 檔案內容格式錯誤")
-		return 0
-	}
-	fmt.Printf("✅ 成功讀取舊數據：%d\n", count)
-	return count
-}
-
-// --- 新增：寫入檔案的函式 ---
-func saveCount(count int) {
-	// 把數字轉成字串，再轉成 byte 寫入檔案
-	// 0644 是 Linux 的權限設定，代表「我能讀寫，其他人只能讀」
-	os.WriteFile("counter.txt", []byte(strconv.Itoa(count)), 0644)
-}
-
 func home(w http.ResponseWriter, r *http.Request) {
 
 	// 每次有人進首頁，數字就加 1
 	mu.Lock()
 	visitorCount++
-	saveCount(visitorCount)
 	fmt.Printf("檢測到新造訪！目前總人數：%d | 來源 IP: %s\n", visitorCount, r.RemoteAddr)
 	mu.Unlock()
 
@@ -76,7 +51,7 @@ func awards(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 
-	visitorCount = loadCount()
+	visitorCount = 0
 
 	// 當 Google 來找這個檔案時，直接把檔案內容讀給它看
 	http.HandleFunc("/google2d7020435e6908ed.html", func(w http.ResponseWriter, r *http.Request) {
