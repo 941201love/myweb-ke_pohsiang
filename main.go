@@ -1,26 +1,86 @@
 package main
 
 import (
+	"database/sql"
 	"fmt" // 新增：印出更詳細的啟動訊息
 	"html/template"
 	"net/http"
-	"os"   // 新增：引入處理環境變數的工具
-	"sync" // 新增：防止多個人同時造訪造成計算錯誤
+	"os"      // 新增：引入處理環境變數的工具
+	"strings" // 新增：用來轉換資料庫網址格式
+	"sync"    // 新增：防止多個人同時造訪造成計算錯誤
+
+	_ "github.com/go-sql-driver/mysql" // 重要：請記得執行 go get github.com/go-sql-driver/mysql
 )
 
 /* ----------------------------------------------------------- */
 
-// 宣告一個全域變數來存次數
-var visitorCount int
+var db *sql.DB
 var mu sync.Mutex // 這是「互斥鎖」，確保加法時不會出錯
+
+// 初始化資料庫連線：讀取 Railway 的 MYSQL_URL 並轉換格式
+func initDB() {
+	// 從環境變數讀取
+	rawURL := os.Getenv("MYSQL_URL")
+	if rawURL == "" {
+		fmt.Println("⚠️ 警告：找不到 MYSQL_URL，將無法儲存訪客數據")
+		return
+	}
+
+	// 格式轉換魔術：把 mysql://user:pass@host:port/db
+	// 轉成 Go 驅動要求的 user:pass@tcp(host:port)/db
+	dsn := strings.Replace(rawURL, "mysql://", "", 1)
+	dsn = strings.Replace(dsn, "@", "@tcp(", 1)
+	parts := strings.Split(dsn, "/")
+	if len(parts) > 0 {
+		parts[0] = parts[0] + ")"
+	}
+	dsn = strings.Join(parts, "/")
+
+	var err error
+	db, err = sql.Open("mysql", dsn)
+	if err != nil {
+		fmt.Printf("❌ 資料庫連線失敗: %v\n", err)
+		return
+	}
+
+	// 測試連線是否真的通了
+	err = db.Ping()
+	if err != nil {
+		fmt.Printf("❌ 無法與資料庫建立通訊: %v\n", err)
+	} else {
+		fmt.Println("✅ 資料庫連線成功！")
+	}
+}
+
+// 從資料庫更新並抓取最新的訪客數
+func getCountFromDB() int {
+	if db == nil {
+		return 0
+	}
+
+	mu.Lock()
+	defer mu.Unlock()
+
+	// 1. 先把資料庫裡的數字 +1
+	_, err := db.Exec("UPDATE stats SET counter = counter + 1 WHERE id = 1")
+	if err != nil {
+		fmt.Println("更新失敗:", err)
+	}
+
+	// 2. 抓出目前的數字
+	var count int
+	err = db.QueryRow("SELECT counter FROM stats WHERE id = 1").Scan(&count)
+	if err != nil {
+		fmt.Println("讀取失敗:", err)
+		return 0
+	}
+	return count
+}
 
 func home(w http.ResponseWriter, r *http.Request) {
 
-	// 每次有人進首頁，數字就加 1
-	mu.Lock()
-	visitorCount++
+	visitorCount := getCountFromDB()
 	fmt.Printf("檢測到新造訪！目前總人數：%d | 來源 IP: %s\n", visitorCount, r.RemoteAddr)
-	mu.Unlock()
 
 	t, err := template.ParseFiles("templates/index.html")
 	if err != nil {
@@ -51,7 +111,8 @@ func awards(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 
-	visitorCount = 0
+	// 啟動時先連線資料庫
+	initDB()
 
 	// 當 Google 來找這個檔案時，直接把檔案內容讀給它看
 	http.HandleFunc("/google2d7020435e6908ed.html", func(w http.ResponseWriter, r *http.Request) {
@@ -77,11 +138,8 @@ func main() {
 		port = "8080"
 	}
 
-	// 這裡微調一下，讓你啟動時就能看到目前讀到了多少人
 	fmt.Println("------------------------------------")
-	fmt.Printf("🚀 伺服器啟動成功！\n")
-	fmt.Printf("📊 目前累積訪客數：%d\n", visitorCount)
-	fmt.Printf("🌐 監聽埠號 (Port): %s\n", port)
+	fmt.Printf("🚀 伺服器啟動成功！Port: %s\n", port)
 	fmt.Println("------------------------------------")
 
 	// 這裡必須使用變數 port，不要寫死 :8080
