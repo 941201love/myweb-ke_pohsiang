@@ -20,7 +20,7 @@ var mu sync.Mutex // 這是「互斥鎖」，確保加法時不會出錯
 // 初始化資料庫連線：讀取 Railway 的 MYSQL_URL 並轉換格式
 func initDB() {
 	// 從環境變數讀取
-	rawURL := os.Getenv("MYSQL_URL")
+	rawURL := os.Getenv("MYSQL_URL--comfortable-flow")
 	if rawURL == "" {
 		fmt.Println("⚠️ 警告：找不到 MYSQL_URL，將無法儲存訪客數據")
 		return
