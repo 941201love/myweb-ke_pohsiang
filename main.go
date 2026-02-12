@@ -4,19 +4,31 @@ import (
 	"fmt" // 新增：印出更詳細的啟動訊息
 	"html/template"
 	"net/http"
-	"os" // 新增：引入處理環境變數的工具
-	// 新增：防止多個人同時造訪造成計算錯誤
+	"os"   // 新增：引入處理環境變數的工具
+	"sync" // 新增：防止多個人同時造訪造成計算錯誤
 )
 
 /* ----------------------------------------------------------- */
 
+// 宣告一個全域變數來存次數
+var visitorCount int
+var mu sync.Mutex // 這是「互斥鎖」，確保加法時不會出錯
+
 func home(w http.ResponseWriter, r *http.Request) {
+
+	// 每次有人進首頁，數字就加 1
+	mu.Lock()
+	visitorCount++
+	mu.Unlock()
+
 	t, err := template.ParseFiles("templates/index.html")
 	if err != nil {
 		http.Error(w, "找不到首頁檔案", http.StatusInternalServerError)
 		return
 	}
-	t.Execute(w, nil)
+
+	// 重點：把 visitorCount 傳進 Execute 的第二個參數
+	t.Execute(w, visitorCount)
 }
 
 func about(w http.ResponseWriter, r *http.Request) {
@@ -62,7 +74,7 @@ func main() {
 		port = "8080"
 	}
 
-	fmt.Printf("伺服器準備就緒，正在監聽 Port: %s\n", port)
+	fmt.Printf("伺服器準備就緒，訪客計數中... Port: %s\n", port)
 
 	// 這裡必須使用變數 port，不要寫死 :8080
 	err := http.ListenAndServe(":"+port, nil)
