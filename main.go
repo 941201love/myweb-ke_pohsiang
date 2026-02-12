@@ -19,6 +19,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 	// 每次有人進首頁，數字就加 1
 	mu.Lock()
 	visitorCount++
+	fmt.Printf("檢測到新造訪！目前總人數：%d | 來源 IP: %s\n", visitorCount, r.RemoteAddr)
 	mu.Unlock()
 
 	t, err := template.ParseFiles("templates/index.html")
