@@ -100,7 +100,7 @@ nav a:hover {
     position: static;
     transform: none; 
     color: #FFE5D9;
-    font-size: 1.1rem;
+    font-size: 1.5rem;
     font-weight: bold;
     white-space: nowrap; /* 避免文字換行 */
 }
