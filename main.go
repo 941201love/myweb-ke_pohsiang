@@ -17,17 +17,17 @@ var mu sync.Mutex // 這是「互斥鎖」，確保加法時不會出錯
 
 // --- 新增：讀取檔案的函式 ---
 func loadCount() int {
-	// 讀取 counter.txt
 	data, err := os.ReadFile("counter.txt")
 	if err != nil {
-		// 如果檔案不存在，代表是第一個訪客，回傳 0
+		fmt.Println("⚠️ 找不到 counter.txt，將從 0 開始")
 		return 0
 	}
-	// 把讀到的 byte 轉成字串，再轉成整數
 	count, err := strconv.Atoi(string(data))
 	if err != nil {
+		fmt.Println("⚠️ 檔案內容格式錯誤")
 		return 0
 	}
+	fmt.Printf("✅ 成功讀取舊數據：%d\n", count)
 	return count
 }
 
